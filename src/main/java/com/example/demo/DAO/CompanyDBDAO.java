@@ -3,6 +3,9 @@ package com.example.demo.DAO;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -32,25 +35,30 @@ public class CompanyDBDAO implements CompanyDAO {
 	CouponRepository couponRepo;
 	@Autowired
 	DBAccess dbaccess;
+	
+	private static final Logger logger = LogManager.getLogger();
 		
 /**
  * creates a given company in the DB works only if there is no company with the same name	
+ * @return 
  * @throws CompanyNameTakenException 
  * @throws InterruptedException 
  */
 	
-	public synchronized boolean createCompany(Company c) throws InterruptedException {
+	public synchronized void createCompany(Company c) throws InterruptedException, CompanyNameTakenException {
 			dbaccess.getConnection();
-			if (companyRepo.findCompanyByCompanyName(c.getCompanyName()) == null) {
+			if (companyRepo.findCompanyByCompanyName(c.getCompanyName()) == null && c.getCompanyName()!= null) {
+			logger.info("Creating company, ID:" + c.getId());
 			companyRepo.save(c);
+			logger.info("Company create success");
 			dbaccess.returnConnection();
-			return true;
+	
 		}
 		else
 		{
 			dbaccess.returnConnection();
-			System.out.println("This company name is already taken");
-			return false;
+			logger.error("Company creation failed");
+			throw new CompanyNameTakenException("This company name is already taken");
 		}
 	}
 	
@@ -58,18 +66,21 @@ public class CompanyDBDAO implements CompanyDAO {
  * removes a given company from the DB
  * @throws InterruptedException 
  */
-	
+
 	public synchronized boolean removeCompany(Company c) throws  InterruptedException {
 
 		dbaccess.getConnection();
 		if (companyRepo.findCompanyByCompanyName(c.getCompanyName()) != null) {
+			logger.info("Deleting company, ID:" + c.getId());
 			companyRepo.delete(c);
+			logger.info("Company Delete success");
 		dbaccess.returnConnection();
 		return true;
 		}
 		else
 			{
 			dbaccess.returnConnection();
+			logger.error("Company delete failed");
 			System.out.println("There is no such company");
 			return false;
 			}
@@ -83,12 +94,14 @@ public class CompanyDBDAO implements CompanyDAO {
 	public synchronized void updateCompany(Company c) throws CompanyNotFoundException, InterruptedException {
 			dbaccess.getConnection();
 		if (companyRepo.findCompanyByCompanyName(c.getCompanyName()) != null) {	
-			
+			logger.info("Updating company, ID:" + c.getId());
 			companyRepo.save(c);
+			logger.info("Company update sucess");
 			dbaccess.returnConnection();
 		}
 		else {
 			dbaccess.returnConnection();
+			logger.error("Company update failed");
 			throw new CompanyNotFoundException ("There is no such company");
 		}
 		
@@ -98,48 +111,54 @@ public class CompanyDBDAO implements CompanyDAO {
  * gets a company form the DB with the given id 	
  * @throws InterruptedException 
  */
-	
-	public synchronized Company getCompany(long id)throws InterruptedException {
 
+	public synchronized Company getCompany(long id)throws InterruptedException {
 		dbaccess.getConnection();
+		logger.info("Getting company, ID:" + id);
 		Company company = companyRepo.findOne(id);
+		logger.info("Company get success");
 		dbaccess.returnConnection();
 		if (company != null) {
 			return company;
 		}
 		else {
 			dbaccess.returnConnection();
+			logger.error("Company get failed");
 			System.out.println("There is no such company");
 			return null;
 		}
-			
-		
 	}
 	
 /**
  * get a list of all the companies from the DB	
  * @throws InterruptedException 
  */
+	
+
 	public ArrayList<Company> getAllCompanies() throws  InterruptedException {
 
 		dbaccess.getConnection();
+		logger.info("Getting all companies");
 		ArrayList<Company> companyList = (ArrayList<Company>) companyRepo.findAll();
 		dbaccess.returnConnection();
 		if (companyList.isEmpty()) {
+			logger.error("Getting comapnies failed");
 			System.out.println("There are no companies");
 		}
+		else logger.info("Getting companies success");
 		return companyList;
 		
 		
 	}
 	
 /**
- * 	get a list of coupons from the DB with the given company
+ * 	get a list of coupons from thge DB with the given company
  * @throws InterruptedException 
  */
 	
 	public List<Coupon> getCoupons(Company c) throws InterruptedException {
 		dbaccess.getConnection();
+		logger.info("Getting company (ID: " + c.getId() +") coupons");
 		List<Coupon> cList = couponRepo.findCouponByCompany(c);
 		dbaccess.returnConnection();
 		return 	cList;
@@ -183,6 +202,7 @@ public class CompanyDBDAO implements CompanyDAO {
 	 */
 	public boolean login(String name,String password) throws InterruptedException {
 		dbaccess.getConnection();
+		logger.info("Checking credentials");
 		boolean result = companyRepo.existsByCompanyNameAndPassword(name,password);
 		dbaccess.returnConnection();	
 		return result;

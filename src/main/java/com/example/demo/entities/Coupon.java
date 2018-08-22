@@ -1,33 +1,34 @@
 package com.example.demo.entities;
 
-import java.util.Date;
+import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import javax.persistence.CascadeType;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinTable;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.JoinColumn;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.example.demo.other.CouponType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * Class coupons that defines the Entity COUPONS
  * @author Dor
  *
  */
-
+@XmlRootElement
 @Entity (name = "COUPON")
-public class Coupon {
+public class Coupon implements Serializable, Comparable<Coupon> {
 	
 	@Id @GeneratedValue (strategy=GenerationType.IDENTITY) 
 	private long id;
@@ -56,6 +57,8 @@ public class Coupon {
 	@Column (name = "IMAGE")
 	private String image;
 	
+	
+	
 	/**
 	 * empty constructor for coupon class
 	 */
@@ -78,12 +81,19 @@ public class Coupon {
 	 */
 			
 			
-		public Coupon( String title, Date startDate, Date endDate, int amount, CouponType type, String message,
+		public Coupon( String title, String startDate, String endDate, int amount, CouponType type, String message,
 				double price, String image) {
 			super();
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 			this.title = title;
-			this.startDate = startDate;
-			this.endDate = endDate;
+			
+			try {
+				this.startDate = df.parse(startDate);
+				this.endDate = df.parse(endDate);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			
 			this.amount = amount;
 			this.type = type;
 			this.message = message;
@@ -98,7 +108,7 @@ public class Coupon {
  * 
  */
 	
-	@ManyToMany(mappedBy = "coupons", fetch = FetchType.EAGER)
+	@ManyToMany(mappedBy = "coupons") //, fetch = FetchType.LAZY)
     private List<Customer> customers = new ArrayList<>();
 
 /**
@@ -108,18 +118,9 @@ public class Coupon {
  */
 	
 	
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne //(fetch = FetchType.LAZY)
 	@JoinColumn(name="COMPANY_ID")
     private Company company;	
-	
-/**
- * get the company that created this coupon
- * @return
- */
-	
-	public Company getCompany() {
-		return company;
-	}
 
 /**
  * sets the company that created this coupon	
@@ -179,7 +180,7 @@ public class Coupon {
  * gets the start date of the coupon	
  * @return
  */
-	
+	@JsonFormat(pattern="dd-MM-yyyy")
 	public Date getStartDate() {
 		return startDate;
 	}
@@ -198,7 +199,7 @@ public class Coupon {
  * @return
  */
 	
-	
+	@JsonFormat(pattern="dd-MM-yyyy")
 	public Date getEndDate() {
 		return endDate;
 	}
@@ -315,14 +316,14 @@ public class Coupon {
 				+ ", amount=" + amount + ", type=" + type + ", message=" + message + ", price=" + price + ", image="
 				+ image;
 	}
-
-/**
- * get the customers list that bought this coupon
- * @return
- */
-	public List<Customer> getCustomers() {
-		return customers;
-	}
+//
+///**
+// * get the customers list that bought this coupon
+// * @return
+// */
+//	public List<Customer> getCustomers() {
+//		return customers;
+//	}
 
 /**
  * sets the customers list that purchased this coupon	
@@ -332,6 +333,35 @@ public class Coupon {
 	public void setCustomers(List<Customer> customers) {
 		this.customers = customers;
 	}
+	
+	public void setTypePic() {
+		switch (this.type.toString()) {
+		case "CLOTHING":
+			this.image = "/company_page/assets/clothing.jpg";
+			break;
+		case "ELECTRONICS":
+			this.image = "/company_page/assets/electronics.jpg";
+			break;
+		case "FOOD":
+			this.image = "/company_page/assets/food.jpg";
+			break;
+		case "FLIGHTS":
+			this.image = "/company_page/assets/flights.jpg";
+			break;
+		case "VACATIONS":
+			this.image = "/company_page/assets/vacations.jpg";
+			break;
+		default:
+			break;
+		}
+	}
+
+
+	@Override
+	public int compareTo(Coupon o) {
+
+	return (int) (this.id - o.id);
+}
 	
 	
 

@@ -9,13 +9,11 @@ import com.example.demo.DAO.CompanyDBDAO;
 import com.example.demo.DAO.CouponDBDAO;
 import com.example.demo.DAO.CustomerDBDAO;
 import com.example.demo.entities.Company;
-import com.example.demo.entities.Coupon;
 import com.example.demo.entities.Customer;
 import com.example.demo.exceptions.CompanyNameTakenException;
 import com.example.demo.exceptions.CompanyNotFoundException;
 import com.example.demo.exceptions.CustomerNameTakenException;
 import com.example.demo.exceptions.CustomerNotFoundException;
-import com.example.demo.exceptions.WrongPasswordException;
 
 
 /**
@@ -57,7 +55,7 @@ public class AdminFacade implements CouponClientFacade {
  * @throws InterruptedException
 */
 	
-	public void createCompany(Company c) throws InterruptedException {
+	public void createCompany(Company c) throws InterruptedException, CompanyNameTakenException {
 		companyDB.createCompany(c);
 	}
 	
@@ -109,7 +107,7 @@ public class AdminFacade implements CouponClientFacade {
  * @throws InterruptedException 
  * @throws CustomerNameTakenException
  */
-	public void createCustomer(Customer c) throws InterruptedException {
+	public void createCustomer(Customer c) throws InterruptedException, CustomerNameTakenException {
 		customerDB.createCustomer(c);
 	}
 	
@@ -155,6 +153,10 @@ public class AdminFacade implements CouponClientFacade {
  */
 	public ArrayList<Customer> getAllCustomers() throws InterruptedException{
 		return customerDB.getAllCustomers();
+	}
+
+	public void shutDown() {
+		System.exit(0);
 	}
 
 }

@@ -8,7 +8,7 @@ import com.example.demo.exceptions.CustomerNameTakenException;
 import com.example.demo.exceptions.CustomerNotFoundException;
 
 public interface CustomerDAO {
-	public boolean createCustomer(Customer c) throws CustomerNameTakenException, InterruptedException;
+	public void createCustomer(Customer c) throws CustomerNameTakenException, InterruptedException;
 	public boolean removeCustoemr(Customer c) throws CustomerNotFoundException, InterruptedException;
 	public void updateCustomer(Customer c) throws CustomerNotFoundException, InterruptedException;
 	public Customer getCustomer(long id) throws InterruptedException;

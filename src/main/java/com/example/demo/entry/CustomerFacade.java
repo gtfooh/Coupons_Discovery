@@ -1,24 +1,18 @@
 package com.example.demo.entry;
-
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
 import com.example.demo.DAO.CouponDBDAO;
 import com.example.demo.DAO.CustomerDBDAO;
 import com.example.demo.entities.Coupon;
 import com.example.demo.entities.Customer;
 import com.example.demo.exceptions.CouponNotFoundException;
 import com.example.demo.exceptions.CustomerNotFoundException;
-import com.example.demo.exceptions.WrongPasswordException;
 import com.example.demo.other.CouponType;
 
-import ch.qos.logback.core.net.ssl.SSLConfigurableServerSocket;
 
 /**
 * class CourrentFacade sends the custoemr orders to the program
@@ -37,9 +31,11 @@ public class CustomerFacade implements CouponClientFacade {
 /**
  * holds the current logged in customer for this specific customerFacade copy
  */
-private Customer currentCustomer;
+public Customer currentCustomer;
 
-
+public void setFakeCustomer() throws InterruptedException {
+	this.currentCustomer= customerDB.getCustomer(1);
+}
 
 
 /**
@@ -73,9 +69,9 @@ private Customer currentCustomer;
 		Date today = new Date();
 		if (couponDB.getCoupon(c.getId()).getAmount()>0 && couponDB.getCoupon(c.getId()).getEndDate().after(today)) {
 			if (couponDB.getCoupon(c.getId()) != null && couponDB.getCouponByIdAndCustomerId(c.getId(),currentCustomer.getId())== null) {
-				List owned = new ArrayList<>();
-				owned.addAll(currentCustomer.getCoupons());
-				currentCustomer.getCoupons().removeAll(owned);
+				List<Coupon> owned = new ArrayList<>();
+				owned = currentCustomer.fetchCoupons(owned);
+				currentCustomer.deleteCoupons(owned);
 				customerDB.updateCustomer(currentCustomer);
 				c.setAmount(c.getAmount()-1);
 				owned.add(c);
@@ -86,19 +82,21 @@ private Customer currentCustomer;
 			else throw new CouponNotFoundException("There is no such coupon");
 		}
 		else {
-			System.out.println("This cooupon is expired or out of stock");
-			return false;
+			throw new CouponNotFoundException("This coupon is expired or out of stock");
 		}
 	}
 	
 
-	public Coupon getCoupon(Coupon c) throws InterruptedException {
-		Coupon coup = couponDB.getCouponByIdAndCustomerId(c.getId(),currentCustomer.getId());
+	public Coupon getCoupon(long id) throws InterruptedException {
+		Coupon coup = couponDB.getCoupon(id);
 		if (coup == null) {
 			System.out.println("there is no such coupon");
 		}	
 			return coup;
 	}
+	
+	
+	
 		
 	
 	
@@ -134,6 +132,21 @@ private Customer currentCustomer;
 	public List<Coupon> getAllPurchasedCouponsByMaxPrice(double price) throws InterruptedException{
 		return couponDB.getCouponsByMaxPriceAndCustomerName(currentCustomer.getCustomerName(),price);
 	}
+
+// 
+public List<Coupon> getAvailableCouponsByMaxPrice(double price) throws InterruptedException {
+	return couponDB.getAvailableCouponsByMaxPrice(price);
+	}
+
+
+public List<Coupon> getAvailableCouponsByType(CouponType type) throws InterruptedException {
+	return couponDB.getAvailableCouponsByType(type);
+}
+
+
+public List<Coupon> getAvailableCoupons() throws InterruptedException {
+	return couponDB.getAvailableCoupons();
+}
 		
 }
 

@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.exceptions.WrongClientTypeException;
-import com.example.demo.exceptions.WrongPasswordException;
 import com.example.demo.other.ClientType;
 
 @Scope("singleton")

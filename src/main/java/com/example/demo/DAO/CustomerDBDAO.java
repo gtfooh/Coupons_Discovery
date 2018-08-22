@@ -1,6 +1,9 @@
 package com.example.demo.DAO;
 
 import java.util.ArrayList;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.example.demo.crud.CouponRepository;
@@ -26,24 +29,28 @@ public class CustomerDBDAO implements CustomerDAO {
 	CouponRepository couponRepo;
 	@Autowired
 	DBAccess dbaccess;
+	
+	private static final Logger logger = LogManager.getLogger();
+	
 
 /**
  * creates a given customer in the DB	
  * @throws InterruptedException 
+ * @throws CustomerNameTakenException 
  */
 	
 	@Override
-	public boolean createCustomer(Customer c) throws InterruptedException {
+	public void createCustomer(Customer c) throws InterruptedException, CustomerNameTakenException {
 		dbaccess.getConnection();
-		if (customerRepo.findCustomerByCustomerName(c.getPassword())==null) {
+		if (customerRepo.findCustomerByCustomerName(c.getCustomerName())==null) {
+			logger.info("Creating customer ID: "+ c.getId());
 			customerRepo.save(c);
+			logger.info("Customer create success ID: "+ c.getId());
 			dbaccess.returnConnection();
-			return true;
 		}
 		else {
-			System.out.println("Customer name already taken");
 			dbaccess.returnConnection();
-			return false;
+			throw new CustomerNameTakenException("Customer name already taken");
 		}
 		
 	}
@@ -57,7 +64,9 @@ public class CustomerDBDAO implements CustomerDAO {
 	public boolean removeCustoemr(Customer c) throws InterruptedException {
 		dbaccess.getConnection();
 		if (customerRepo.findOne(c.getId())!=null) {
+			logger.info("Deleting customer ID: "+ c.getId());
 			customerRepo.delete(c);
+			logger.info("Customer delete success ID: "+ c.getId());
 			dbaccess.returnConnection();
 			return true;
 		}
@@ -76,8 +85,10 @@ public class CustomerDBDAO implements CustomerDAO {
 	@Override
 	public void updateCustomer(Customer c) throws CustomerNotFoundException, InterruptedException {
 		dbaccess.getConnection();
-		if (customerRepo.findOne(c.getId())!=null) {
+		if (customerRepo.findCustomerByCustomerName(c.getCustomerName())!=null) {
+			logger.info("Updating customer ID: "+ c.getId());
 			customerRepo.save(c);
+			logger.info("Customer update success ID: "+ c.getId());
 			dbaccess.returnConnection();
 		}
 		else {
@@ -145,6 +156,7 @@ public class CustomerDBDAO implements CustomerDAO {
 	@Override
 	public boolean login(String custName, String password) throws InterruptedException {
 		dbaccess.getConnection();
+		logger.info("Checking credentials");
 		boolean result = customerRepo.existsByCustomerNameAndPassword(custName, password);
 		dbaccess.returnConnection();
 		return result;

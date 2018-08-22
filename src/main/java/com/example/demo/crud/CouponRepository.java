@@ -44,11 +44,12 @@ public interface CouponRepository extends CrudRepository <Coupon, Long>{
 	@Query("SELECT c FROM COUPON c where c.amount > :amount")
 	public List<Coupon> findWhereAmountLargerThan(@Param("amount")int amount);
 /**
- * 	returns a coupon object from the DB with the given amount
+ * 	returns all the coupons that are available to purchase - amount higgher then 0
  * @param amount
  * @return
  */
-	public Coupon findCouponByAmount(int amount);
+	@Query("SELECT c FROM COUPON c where c.amount > 0")
+	public List<Coupon> findAvailableCoupon();
 /**
  * returns a list of all the coupon objects from the DB with the given Type	
  * @param type
@@ -162,7 +163,33 @@ public interface CouponRepository extends CrudRepository <Coupon, Long>{
 	@Query("DELETE COUPON c WHERE c.company = :company")
 	public void deleteAllCompanyCoupons(@Param("company") Company c);
 	
+	/**
+	 * retrieves a coupon with a given id and a given customer id
+	 * @param coupId
+	 * @param custId
+	 * @return
+	 */
+	
 	@Query("SELECT c FROM COUPON c JOIN c.customers cu WHERE c.id = :coupId AND cu.id = :custId")
 	public Coupon getCouponByIdAndCustomerId(@Param("coupId")long coupId,@Param("custId")long custId);
+	
+	/**
+	 * get all coupons with amount higher than 0 and max price by the given price
+	 * @param price
+	 * @return
+	 */
+//	
+	@Query("SELECT c FROM COUPON c WHERE c.price <= :price AND c.amount > 0")
+	public List<Coupon> getAvailableCouponsByPrice( @Param("price") double price);
+
+	
+	/**
+	 * get all coupons with amount higher than 0 and of the given type
+	 * @param price
+	 * @return
+	 */
+	
+	@Query("SELECT c FROM COUPON c WHERE c.type = :type AND c.amount > 0")
+	public List<Coupon> getAvailableCouponsByType(@Param("type")CouponType type);
 }
 																																																																															

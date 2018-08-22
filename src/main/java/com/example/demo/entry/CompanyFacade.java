@@ -12,7 +12,6 @@ import com.example.demo.entities.Coupon;
 import com.example.demo.exceptions.CompanyNotFoundException;
 import com.example.demo.exceptions.CouponAlreadyExistsException;
 import com.example.demo.exceptions.CouponNotFoundException;
-import com.example.demo.exceptions.WrongPasswordException;
 import com.example.demo.other.CouponType;
 
 /**
@@ -33,10 +32,22 @@ CompanyDBDAO companyDB;
 CouponDBDAO couponDB;
 
 
+@Override
+public String toString() {
+	return "CompanyFacade [companyDB=" + companyDB + ", couponDB=" + couponDB + ", currentCompany=" + currentCompany
+			+ "]";
+}
+
 /**
  * holds the current connected company to the specific Company facade copy
  */
-Company currentCompany;
+
+public Company currentCompany;
+
+
+public void setFakeCompany() throws InterruptedException {
+	this.currentCompany = companyDB.getCompany(1);
+}
 
 
 /**
@@ -67,18 +78,15 @@ Company currentCompany;
 	 */
 	
 	
-	public boolean createCoupon(Coupon c) throws CompanyNotFoundException, InterruptedException {
-		if (couponDB.getCoupon(c.getId())==null) {
+	public boolean createCoupon(Coupon c) throws CompanyNotFoundException, InterruptedException, CouponAlreadyExistsException {
+		if (couponDB.getCouponByTitle(c.getTitle()) ==null) {
 			c.setCompany(currentCompany);
 			couponDB.createCoupon(c);
-			currentCompany.addCoupon(c);
-			companyDB.updateCompany(currentCompany);
 			return true;
 		
 		}
 		else {
-			System.out.println("This coupon name is taken");
-			return false;
+			throw new CouponAlreadyExistsException("This coupon name is taken");
 		}
 
 /**
@@ -86,11 +94,12 @@ Company currentCompany;
  */
 	}
 	public void removeCoupon(Coupon c) throws CouponNotFoundException, CompanyNotFoundException, InterruptedException {
-		if (couponDB.getCoupon(c.getId()) != null) {
-			currentCompany.getCoupons().remove(c);
+		if (couponDB.getCouponByTitle(c.getTitle()) != null) {
+			currentCompany.removeCoupon(c);
 			c.setCompany(null);
 			companyDB.updateCompany(currentCompany);
 			couponDB.updateCoupon(c);
+			couponDB.removeCoupon(c);
 			couponDB.removeCoupon(c);
 		}
 		else throw new CouponNotFoundException("There is no such coupon");
@@ -102,6 +111,7 @@ Company currentCompany;
 	}
 	public void updateCoupon(Coupon c) throws CouponNotFoundException, InterruptedException {
 		if (couponDB.getCouponByIdAndCompany(c.getId(), currentCompany) != null) {
+			c.setCompany(currentCompany);
 			couponDB.updateCoupon(c);
 		}
 		else throw new CouponNotFoundException("There is no such coupon");

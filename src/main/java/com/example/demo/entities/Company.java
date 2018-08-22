@@ -1,9 +1,8 @@
 package com.example.demo.entities;
 
  
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -12,17 +11,17 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * 
  * @author Dor
  *Class Company that defines the entity COMPANY
  */
-
+@XmlRootElement
 @Entity (name = "COMPANY")
-public class Company {
+public class Company implements Serializable , Comparable<Company> {
 	
 
 	@Id @GeneratedValue (strategy=GenerationType.IDENTITY) 
@@ -151,14 +150,6 @@ public class Company {
 				+ ", coupons=" + coupons + "]";
 	}
 
-/** 
- * returns list of company coupons
- * @return
- */
-	public List<Coupon> getCoupons() {
-		return coupons;
-	}
-
 /**
  * sets the company coupons list	
  * @param coupon
@@ -183,6 +174,15 @@ public class Company {
 	public void removeCoupon (Coupon c) {
 		this.coupons.remove(c);
 	}
+ 
+/**
+  * Sorting strategy (Sort by id), implemented for Comparable interface.
+  */
+
+@Override
+public int compareTo(Company arg0) {
+	return (int)( this.id - arg0.id) ;
+}
 
 	
 }

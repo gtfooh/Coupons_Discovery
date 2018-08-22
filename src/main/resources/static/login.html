@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Flat login form</title>
+  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+
+  
+      <link rel="stylesheet" href="css/style.css">
+
+  
+</head>
+
+<body>
+
+  <div class="login-container">
+  <div class="login-header">
+    <h1 title="login">Coupon System</h1>
+  </div>
+  <div class="login-form">
+    <form action=/main-service/loginservlet method="GET">
+      <input type="text" name="user_name" placeholder="Username" />
+      <br /><br />
+      <input type="password" name="password" placeholder="Passowrd" />
+      <br /><br />
+    <select name= "type">
+  		<option value="" disabled selected>Select Client Type</option>
+  		<option value="ADMIN">Admin</option>
+  		<option value="COMPANY">Company</option>
+  		<option value="CUSTOMER">Customer</option>
+	</select>
+	  <br /><br />
+      <input title="login" type="submit" value="Login" />
+      <br /><br />
+    </form>
+  </div>
+</div>
+  <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+
+  
+
+    <script  src="js/index.js"></script>
+
+
+
+
+</body>
+
+</html>

@@ -1,5 +1,6 @@
 package com.example.demo.entities;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.xml.bind.annotation.XmlRootElement;
 
 
 /**
@@ -20,9 +22,9 @@ import javax.persistence.ManyToMany;
  * @author Dor
  *
  */
-
+@XmlRootElement
 @Entity (name = "CUSTOMER")
-public class Customer {
+public class Customer implements Serializable , Comparable<Customer> {
 	
 	@Id @GeneratedValue (strategy=GenerationType.IDENTITY)
 	private long id;
@@ -122,15 +124,15 @@ public class Customer {
 	    )
 	    List<Coupon> coupons = new ArrayList <>();
 	
-/**
- * gets the  list of coupons that this customer purchased
- * @return
- */
-	 
-	 
-	public List<Coupon> getCoupons() {
-		return coupons;
-	}
+///**
+// * gets the  list of coupons that this customer purchased
+// * @return
+// */
+//	 
+//	 
+//	public List<Coupon> getCoupons() {
+//		return coupons;
+//	}
 
 /**
  * sets the list of coupons	that this customer purchased
@@ -150,6 +152,31 @@ public class Customer {
 		return "Customer [id=" + id + ", customerName=" + customerName + ", password=" + password + ", coupons="
 				+ coupons + "]";
 	}
+
+public List<Coupon> fetchCoupons(List<Coupon> owned) {
+	owned.addAll(this.coupons);
+	return owned;
+	
+	// TODO Auto-generated method stub
+	
+}
+
+public void deleteCoupons(List<Coupon> owned) {
+	this.coupons.removeAll(owned);
+	// TODO Auto-generated method stub
+	
+}
+
+/**
+ * Sorting strategy (Sort by id), implemented for Comparable interface.
+ */
+
+@Override
+public int compareTo(Customer arg0) {
+	// TODO Auto-generated method stub
+	return (int)( this.id - arg0.id);
+}
+
 	
 	
 

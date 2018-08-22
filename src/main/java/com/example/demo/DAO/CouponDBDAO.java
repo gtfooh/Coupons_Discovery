@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,8 @@ public class CouponDBDAO implements CouponDAO {
 	@Autowired
 	DBAccess dbaccess;
 
+	private static final Logger logger = LogManager.getLogger();
+	
 /** 
  * creates a given coupon in the DB	
  * @throws InterruptedException 
@@ -33,7 +37,9 @@ public class CouponDBDAO implements CouponDAO {
 	@Override
 	public void createCoupon(Coupon c) throws InterruptedException {
 	dbaccess.getConnection();
+	logger.info("Creating coupon ID: " + c.getId());
 	couponRepo.save(c);
+	logger.info("Coupon create success, ID: " + c.getId());
 	dbaccess.returnConnection();
 	}
 	
@@ -45,7 +51,9 @@ public class CouponDBDAO implements CouponDAO {
 	@Override
 	public void removeCoupon(Coupon c) throws InterruptedException {
 		dbaccess.getConnection();
+		logger.info("Deleting coupon ID: " + c.getId());
 		couponRepo.delete(c);
+		logger.info("Coupon delete success, ID: " + c.getId());
 		dbaccess.returnConnection();
 	}
 
@@ -57,7 +65,9 @@ public class CouponDBDAO implements CouponDAO {
 	@Override
 	public void updateCoupon(Coupon c) throws InterruptedException {
 		dbaccess.getConnection();
+		logger.info("Updating coupon ID: " + c.getId());
 		couponRepo.save(c);
+		logger.info("Coupon update success, ID: " + c.getId());
 		dbaccess.returnConnection();
 	}
 
@@ -74,6 +84,15 @@ public class CouponDBDAO implements CouponDAO {
 		return coupon;
 	}
 
+
+	
+	public Coupon getCouponByTitle(String title) throws InterruptedException{
+		dbaccess.getConnection();
+		Coupon coupon =	couponRepo.findCouponByTitle(title);	
+		dbaccess.returnConnection();
+		return coupon;
+	}
+	
 /**
  * gets a list of all the coupons from the DB	
  * @throws InterruptedException 
@@ -191,6 +210,7 @@ public class CouponDBDAO implements CouponDAO {
 	
 	public void deleteAllCouponsByCompany(Company c) throws InterruptedException {
 		dbaccess.getConnection();
+		logger.info("Deleting all company coupons ID: " + c.getId());
 		couponRepo.deleteAllCompanyCoupons(c);
 		dbaccess.returnConnection();
 	}
@@ -200,5 +220,27 @@ public class CouponDBDAO implements CouponDAO {
 		Coupon coup =  couponRepo.getCouponByIdAndCustomerId(coupId, custId);
 		dbaccess.returnConnection();
 		return coup;
+	}
+//   
+	public List<Coupon> getAvailableCouponsByMaxPrice(double price) throws InterruptedException {
+		dbaccess.getConnection();
+		List<Coupon> result = couponRepo.getAvailableCouponsByPrice(price);
+		dbaccess.returnConnection();
+		return result;
+		 
+	}
+
+	public List<Coupon> getAvailableCouponsByType(CouponType type) throws InterruptedException {
+		dbaccess.getConnection();
+		List<Coupon> result = couponRepo.getAvailableCouponsByType(type);
+		dbaccess.returnConnection();
+		return result;
+	}
+
+	public List<Coupon> getAvailableCoupons() throws InterruptedException {
+		dbaccess.getConnection();
+		List<Coupon> result = couponRepo.findAvailableCoupon();
+		dbaccess.returnConnection();
+		return result;
 	}
 }
